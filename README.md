@@ -8,7 +8,7 @@ similar to Control= in Emacs.
 example mapping: 
 
 ```lua
-vim.keymap.set('v', '\<space\>\<space\>', require('wgc-expand-region').expand-region)
+vim.keymap.set('v', '<space><space>', require('wgc-expand-region').expand-region)
 ```
 
 With the above mapping, when you are in v mode and press \<space\>\<space\>
