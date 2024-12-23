@@ -1,13 +1,13 @@
-# wgc-expand-reqion
+# wgc-expand-region
 
-A simple plugin that has a function called expand-reqion that can
+A simple plugin that has a function called expand-region that can
 be mapped to a visual mode key combination to expand the visually 
 selected region using nodes in the treesitter syntax tree. This works
 similar to Control= in Emacs. 
 
 example mapping: 
 
-vim.keymap.set('v', '\<space\>\<space\>', require('wgc-expand-reqion').expand-reqion)
+vim.keymap.set('v', '\<space\>\<space\>', require('wgc-expand-region').expand-region)
 
 With the above mapping, when you are in v mode and press \<space\>\<space\>
 the selected region will expand to the parent node. Press \<space\>\<space\>
@@ -21,7 +21,7 @@ to expand selections to identifiers, blocks, functions, etc.
 ### Lazy
 ```lua
   {
-    'darrell-pittman/wgc-expand-reqion',
+    'darrell-pittman/wgc-expand-region',
     dependencies = {
       {
         'darrell-pittman/wgc-nvim-utils'
