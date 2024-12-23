@@ -4,9 +4,19 @@ local ts = vim.treesitter
 local v_modes = { 'v', 'vs', 'V', 'Vs', t('<C-V>'), t('<C-Vs>') }
 local select_msg = 'Node selected: %s'
 
-local expand_opts = {
+local default_opts = {
   notify_on_expand = true,
 }
+
+local function find_next_node(node, select_start)
+  if not node then return end
+
+  local start_row, start_col = node:range()
+  if select_start[1] ~= (start_row + 1) or select_start[2] ~= (start_col) then
+    return node
+  end
+  return find_next_node(node:parent(), select_start)
+end
 
 local M = {}
 
@@ -17,7 +27,7 @@ M.setup = function(opts)
       vim.notify('Treesitter required to run wgc-expand-region', vim.log.levels.ERROR)
     end
   end
-  expand_opts = tbl.merge(expand_opts, opts)
+  default_opts = tbl.merge(default_opts, opts)
 end
 
 M.expand_region = function()
@@ -32,27 +42,22 @@ M.expand_region = function()
 
   local normal_mode = 'normal! ' .. t('<esc>')
   vim.cmd(normal_mode)
-  local start = vim.api.nvim_buf_get_mark(0, '<')
-  vim.fn.setpos('.', { 0, start[1], start[2] + 1, 0 })
-  local node = ts.get_node()
-  if node then
-    local start_row, start_col, end_row, end_col = node:range()
-    while node and start[1] == (start_row + 1) and start[2] == (start_col) do
-      node = node:parent()
-      if not node then break end
-      start_row, start_col, end_row, end_col = node:range()
-    end
-    vim.fn.setpos('.', { 0, start_row + 1, start_col + 1, 0 })
-    if end_col == 0 then
-      local cmd = 'normal v' .. t('<c-end>')
-      vim.cmd(cmd)
-    else
-      vim.cmd [[normal v]]
-      vim.fn.setpos('.', { 0, end_row + 1, end_col, 0 })
-    end
-    if expand_opts.notify_on_expand and node and node:named() then
-      vim.notify(select_msg:format(node:type()), vim.log.levels.INFO)
-    end
+  local select_start = vim.api.nvim_buf_get_mark(0, '<')
+  vim.fn.setpos('.', { 0, select_start[1], select_start[2] + 1, 0 })
+  local node = find_next_node(ts.get_node(), select_start)
+
+  if not node then return end
+  local start_row, start_col, end_row, end_col = node:range()
+  vim.fn.setpos('.', { 0, start_row + 1, start_col + 1, 0 })
+  if end_col == 0 then
+    local cmd = 'normal v' .. t('<c-end>')
+    vim.cmd(cmd)
+  else
+    vim.cmd [[normal v]]
+    vim.fn.setpos('.', { 0, end_row + 1, end_col, 0 })
+  end
+  if default_opts.notify_on_expand and node and node:named() then
+    vim.notify(select_msg:format(node:type()), vim.log.levels.INFO)
   end
 end
 
