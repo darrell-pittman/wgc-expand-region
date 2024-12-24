@@ -27,11 +27,6 @@ It makes no sense to expand a v-block region with treesitter nodes.
 ```lua
   {
     'darrell-pittman/wgc-expand-region',
-    dependencies = {
-      {
-        'darrell-pittman/wgc-nvim-utils'
-      }
-    },
     opts = {
       notify_on_expand = true,
     }
