@@ -1,4 +1,4 @@
-# wgc-expand-region
+# wgc-expand-region.nvim
 
 A simple neovim plugin that has a function called expand-region that can
 be mapped to a visual mode key combination to expand the visually 
@@ -16,7 +16,7 @@ the selected region will expand to the parent node. Press \<space\>\<space\>
 again and the selected region will expand again.
 
 Note: This plugin is not nearly as useful as mini.ai but it is a simple way
-to expand selections to identifiers, blocks, functions, etc.
+to expand selections to identifiers, statements, blocks, functions, etc.
 
 Note: This plugin only works for visual and visual-line modes (v or V).
 It makes no sense to expand a v-block region with treesitter nodes.
@@ -26,7 +26,7 @@ It makes no sense to expand a v-block region with treesitter nodes.
 ### Lazy
 ```lua
   {
-    'darrell-pittman/wgc-expand-region',
+    'darrell-pittman/wgc-expand-region.nvim',
     opts = {
       notify_on_expand = true,
     }

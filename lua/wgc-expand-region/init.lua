@@ -14,21 +14,29 @@ local default_opts = {
   notify_on_expand = true,
 }
 
+--- Gets range for node with rows adjusted to 1-based index
+--- @param node TSNode: node for which range is sought
+--- @return integer, integer, integer, integer: Start Row, Start Col, End Row, End Col
+local function get_node_range(node)
+  local sr, sc, er, ec = node:range()
+  sr = (sr or 0) + 1
+  sc = sc or 0
+  er = (er or 0) + 1
+  ec = ec or 0
+  return sr, sc, er, ec
+end
+
 --- Finds the next parent treesitter node whose range is larger
---- then the current visual selection
---- @param node TSNode|nil: Node at the beginning of the current visual selection
+--- than the current visual selection
+--- @param node TSNode?: Node at the beginning of the current visual selection
 --- @param select_start string[]: Row and Col of start of current visual selection
 --- @param select_end string[]: Row and Col of end of current visual selection
---- @return TSNode|nil: Returns found node or nil if no node has a range > current
+--- @return TSNode?: Returns found node or nil if no node has a range > current
 --- visual selection
 local function find_next_node(node, select_start, select_end)
   if not node then return end
 
-  local node_start_row, node_start_col, node_end_row, node_end_col = node:range()
-  node_start_row = node_start_row + 1
-  node_start_col = node_start_col + 1
-  node_end_row = node_end_row + 1
-  node_end_col = node_end_col + 1
+  local node_start_row, node_start_col, node_end_row, node_end_col = get_node_range(node)
 
   local select_start_row = select_start[1]
   local select_start_col = select_start[2]
@@ -41,7 +49,7 @@ local function find_next_node(node, select_start, select_end)
         and (node_start_col < select_start_col))
       or (node_end_row > select_end_row)
       or ((node_end_row == select_end_row) and
-        (node_end_col > select_end_col))
+        (node_end_col > select_end_col + 1))
 
   if node_exceeds_selection then
     return node
@@ -75,18 +83,30 @@ M.expand_region = function()
 
   if not in_visual_mode then return end
 
+  -- Go to normal mode to populate '< and '> marks of the current
+  -- visual selection
   vim.cmd('normal! ' .. t('<esc>'))
+
   local select_start = vim.api.nvim_buf_get_mark(0, '<')
   local select_end = vim.api.nvim_buf_get_mark(0, '>')
+
+  -- Set cursor to start of visual selection and retrieve treesitter node at
+  -- that location and then find the next node up the tree
   vim.fn.setpos('.', { 0, select_start[1], select_start[2] + 1, 0 })
   local node = find_next_node(ts.get_node(), select_start, select_end)
 
   if not node then return end
 
-  local start_row, start_col, end_row, end_col = node:range()
-  vim.fn.setpos('.', { 0, start_row + 1, start_col + 1, 0 })
+  -- If end end of document then set end_col to go to very end
+  local start_row, start_col, end_row, end_col = get_node_range(node)
+  if end_row > vim.api.nvim_buf_line_count(0) then
+    end_col = vim.api.nvim_get_vvar('maxcol')
+  end
+
+  -- Visually select range based on ts node returned by find_next_node
+  vim.fn.setpos('.', { 0, start_row, start_col + 1, 0 })
   vim.cmd(string.format('normal %s', mode))
-  vim.fn.setpos('.', { 0, end_row + 1, end_col + 1, 0 })
+  vim.fn.setpos('.', { 0, end_row, end_col, 0 })
 
   if default_opts.notify_on_expand and node and node:named() then
     vim.notify(select_msg:format(node:type()), vim.log.levels.INFO)
