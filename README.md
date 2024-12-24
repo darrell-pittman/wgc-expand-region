@@ -1,6 +1,6 @@
 # wgc-expand-region
 
-A simple plugin that has a function called expand-region that can
+A simple neovim plugin that has a function called expand-region that can
 be mapped to a visual mode key combination to expand the visually 
 selected region using nodes in the treesitter syntax tree. This works
 similar to Control= in Emacs. 
