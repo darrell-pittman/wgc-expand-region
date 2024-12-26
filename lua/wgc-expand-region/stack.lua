@@ -53,4 +53,14 @@ function M:peek()
   return self[self.last]
 end
 
+--- Clears the stack
+--- @return nil
+function M:clear()
+  for i = 1, #self do
+    self[i] = nil
+  end
+  self.first = 1
+  self.last = 0
+end
+
 return M

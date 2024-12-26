@@ -1,14 +1,22 @@
 -- A stack that holds data for highlighted nodes
 local nodes
 
+-- True while we are expanding or collapsing
+local expanding = false
+
 --- A utility function to replace termcodes
 --- @param str string: String for which termcodes will be replaced
 local t = function(str)
   return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
+-- convenience var
 local ts = vim.treesitter
+
+-- list of visual modes that allow expansion
 local v_modes = { 'v', 'vs', 'V', 'Vs' }
+
+-- Notify msg
 local select_msg = 'Node selected: %s'
 
 --- Configuration table for wgc-expand-region plugin
@@ -123,6 +131,24 @@ M.setup = function(opts)
   nodes = require('wgc-expand-region.stack').new(default_opts.stack_capacity)
 end
 
+--- A flag indicating is we are currently expanding or collapsing
+--- @return boolean: True is we are expanding of collapsing visual selection
+M.is_expanding = function()
+  return expanding
+end
+
+--- Clears the node stack
+--- @return nil
+M.clear_stack = function()
+  nodes:clear()
+end
+
+--- Returns an iterator for the visual modes the this plugin responds to
+--- @return Iter
+M.visual_modes = function()
+  return vim.iter(v_modes)
+end
+
 --- Expands or contracts visual selection
 --- @param node_finder function: A function that receives a TSNode and visual
 --- selection start and end and returns a StackNode
@@ -133,6 +159,8 @@ local function highlight_node(node_finder)
   end)
 
   if not in_visual_mode then return end
+
+  expanding = true
 
   -- Go to normal mode to populate '< and '> marks of the current
   -- visual selection
@@ -148,6 +176,7 @@ local function highlight_node(node_finder)
   local node_data = node_finder(ts.get_node(), select_start, select_end)
 
   if not node_data then
+    expanding = false
     return
   end
 
@@ -162,6 +191,8 @@ local function highlight_node(node_finder)
   vim.fn.setpos('.', { 0, node_data.start_row, node_data.start_col + 1, 0 })
   vim.cmd(string.format('normal %s', mode))
   vim.fn.setpos('.', { 0, node_data.end_row, end_col, 0 })
+
+  expanding = false
 
   -- Notify type of node that has been highlighted
   if default_opts.notify_on_expand then
@@ -189,6 +220,7 @@ M.expand_region = function()
 end
 
 --- Contracts current visual selection to previous visual selection
+--- @return nil
 M.contract_region = function()
   highlight_node(find_child_node)
 end
