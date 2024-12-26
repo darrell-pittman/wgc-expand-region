@@ -131,8 +131,9 @@ M.setup = function(opts)
   nodes = require('wgc-expand-region.stack').new(default_opts.stack_capacity)
 end
 
---- A flag indicating is we are currently expanding or collapsing
---- @return boolean: True is we are expanding of collapsing visual selection
+--- A flag indicating if we are currently expanding or collapsing
+--- @return boolean: True means we are currently expanding or collapsing
+--- the visual selection
 M.is_expanding = function()
   return expanding
 end
@@ -143,7 +144,7 @@ M.clear_stack = function()
   nodes:clear()
 end
 
---- Returns an iterator for the visual modes the this plugin responds to
+--- Returns an iterator for the visual modes for which this plugin responds
 --- @return Iter
 M.visual_modes = function()
   return vim.iter(v_modes)
