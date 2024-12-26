@@ -24,6 +24,7 @@ to expand selections to identifiers, statements, blocks, functions, etc.
 Note: This plugin only works for visual and visual-line modes (v or V).
 It makes no sense to expand a v-block region with treesitter nodes.
 
+![](expand-region.gif)
 ## Installation
 
 ### Lazy
