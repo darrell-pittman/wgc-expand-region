@@ -5,8 +5,6 @@ local pattern = expand_region.visual_modes():map(function(mode)
   return mode .. ':*'
 end):totable()
 
-print(vim.inspect(pattern))
-
 local group = vim.api.nvim_create_augroup(
   'WgcExpandRegionGroup',
   { clear = true })
