@@ -127,21 +127,16 @@ M.setup = function(opts)
       vim.notify('Treesitter required to run wgc-expand-region', vim.log.levels.ERROR)
     end
   end
-  default_opts = vim.tbl_deep_extend('force', default_opts, opts)
+  default_opts = vim.tbl_extend('force', default_opts, opts)
   nodes = require('wgc-expand-region.stack').new(default_opts.stack_capacity)
 end
 
---- A flag indicating if we are currently expanding or collapsing
---- @return boolean: True means we are currently expanding or collapsing
---- the visual selection
-M.is_expanding = function()
-  return expanding
-end
-
---- Clears the node stack
+--- Clears the node stack unless expanding
 --- @return nil
 M.clear_stack = function()
-  nodes:clear()
+  if not expanding then
+    nodes:clear()
+  end
 end
 
 --- Returns an iterator for the visual modes for which this plugin responds

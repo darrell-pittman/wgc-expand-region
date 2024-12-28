@@ -15,8 +15,6 @@ vim.api.nvim_create_autocmd('ModeChanged', {
   group = group,
   pattern = pattern,
   callback = function()
-    if not expand_region.is_expanding() then
-      expand_region.clear_stack()
-    end
+    expand_region.clear_stack()
   end
 })
